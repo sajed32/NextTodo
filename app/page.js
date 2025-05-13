@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { FaCheckCircle, FaRegCircle, FaTrashAlt, FaPlus, FaTimes } from "react-icons/fa";
 
 export default function Home() {
   const [showDialog, setShowDialog] = useState(false);
@@ -49,10 +50,10 @@ export default function Home() {
           Todo App
         </h1>
         <button
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow mb-4 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow mb-4 transition-colors flex items-center gap-2"
           onClick={() => setShowDialog(true)}
         >
-          + Add Task
+          <FaPlus /> Add Task
         </button>
         <ul className="w-full bg-white dark:bg-gray-800 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-700 min-h-[80px]">
           {todos.length === 0 && (
@@ -61,27 +62,32 @@ export default function Home() {
           {todos.map((todo) => (
             <li key={todo.id} className="flex items-center justify-between p-4">
               <span
-                className={`flex-1 ${todo.completed ? "line-through text-gray-400" : ""}`}
+                className={`flex-1 flex items-center gap-2 ${todo.completed ? "line-through text-gray-400" : ""}`}
                 onClick={() => handleComplete(todo.id)}
                 style={{ cursor: "pointer" }}
                 title="Toggle complete"
               >
+                {todo.completed ? (
+                  <FaCheckCircle className="text-green-500" />
+                ) : (
+                  <FaRegCircle className="text-gray-400" />
+                )}
                 {todo.title}
               </span>
               <div className="flex gap-2">
                 <button
-                  className={`text-green-600 hover:underline ${todo.completed ? "opacity-60" : ""}`}
+                  className={`text-green-600 hover:underline flex items-center gap-1 ${todo.completed ? "opacity-60" : ""}`}
                   onClick={() => handleComplete(todo.id)}
                   aria-label="Complete"
                 >
-                  {todo.completed ? "Undo" : "Complete"}
+                  {todo.completed ? <FaRegCircle /> : <FaCheckCircle />} {todo.completed ? "Undo" : "Complete"}
                 </button>
                 <button
-                  className="text-red-500 hover:underline"
+                  className="text-red-500 hover:underline flex items-center gap-1"
                   onClick={() => handleDelete(todo.id)}
                   aria-label="Delete"
                 >
-                  Delete
+                  <FaTrashAlt /> Delete
                 </button>
               </div>
             </li>
@@ -95,9 +101,22 @@ export default function Home() {
             className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 w-80 flex flex-col gap-4"
             onSubmit={handleAddTask}
           >
-            <h2 className="text-xl font-bold mb-2 text-blue-700 dark:text-blue-300">
-              Add Task
-            </h2>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                Add Task
+              </h2>
+              <button
+                type="button"
+                className="text-gray-400 hover:text-red-500 text-lg"
+                onClick={() => {
+                  setShowDialog(false);
+                  setNewTask("");
+                }}
+                aria-label="Close dialog"
+              >
+                <FaTimes />
+              </button>
+            </div>
             <input
               className="border rounded px-3 py-2 text-black w-full mb-4"
               type="text"
@@ -108,73 +127,26 @@ export default function Home() {
             />
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center gap-1"
                 type="button"
                 onClick={() => {
                   setShowDialog(false);
                   setNewTask("");
                 }}
               >
-                Cancel
+                <FaTimes /> Cancel
               </button>
               <button
-                className="px-4 py-2 rounded bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
+                className="px-4 py-2 rounded bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60 flex items-center gap-1"
                 type="submit"
                 disabled={!newTask.trim()}
               >
-                Submit
+                <FaPlus /> Submit
               </button>
             </div>
           </form>
         </div>
       )}
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
