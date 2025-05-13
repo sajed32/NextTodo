@@ -1,56 +1,133 @@
+"use client";
+
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [showDialog, setShowDialog] = useState(false);
+  const [todos, setTodos] = useState([]);
+  const [newTask, setNewTask] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  // Load todos from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("todos");
+    if (stored) setTodos(JSON.parse(stored));
+  }, []);
+
+  // Save todos to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  const handleAddTask = (e) => {
+    e.preventDefault();
+    if (!newTask.trim()) return;
+    setTodos([
+      ...todos,
+      { id: Date.now(), title: newTask, completed: false },
+    ]);
+    setNewTask("");
+    setShowDialog(false);
+  };
+
+  const handleComplete = (id) => {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  const handleDelete = (id) => {
+    setTodos(todos.filter((todo) => todo.id !== id));
+  };
+
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-gradient-to-br from-gray-100 to-blue-100 dark:from-gray-900 dark:to-blue-950">
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full max-w-md">
+        <h1 className="text-3xl font-extrabold mb-2 text-blue-700 dark:text-blue-300">
+          Todo App
+        </h1>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow mb-4 transition-colors"
+          onClick={() => setShowDialog(true)}
+        >
+          + Add Task
+        </button>
+        <ul className="w-full bg-white dark:bg-gray-800 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-700 min-h-[80px]">
+          {todos.length === 0 && (
+            <li className="p-4 text-center text-gray-400">No tasks yet.</li>
+          )}
+          {todos.map((todo) => (
+            <li key={todo.id} className="flex items-center justify-between p-4">
+              <span
+                className={`flex-1 ${todo.completed ? "line-through text-gray-400" : ""}`}
+                onClick={() => handleComplete(todo.id)}
+                style={{ cursor: "pointer" }}
+                title="Toggle complete"
+              >
+                {todo.title}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  className={`text-green-600 hover:underline ${todo.completed ? "opacity-60" : ""}`}
+                  onClick={() => handleComplete(todo.id)}
+                  aria-label="Complete"
+                >
+                  {todo.completed ? "Undo" : "Complete"}
+                </button>
+                <button
+                  className="text-red-500 hover:underline"
+                  onClick={() => handleDelete(todo.id)}
+                  aria-label="Delete"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </main>
+      {/* Dialog Box */}
+      {showDialog && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <form
+            className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 w-80 flex flex-col gap-4"
+            onSubmit={handleAddTask}
+          >
+            <h2 className="text-xl font-bold mb-2 text-blue-700 dark:text-blue-300">
+              Add Task
+            </h2>
+            <input
+              className="border rounded px-3 py-2 text-black w-full mb-4"
+              type="text"
+              placeholder="Task title"
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                type="button"
+                onClick={() => {
+                  setShowDialog(false);
+                  setNewTask("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
+                type="submit"
+                disabled={!newTask.trim()}
+              >
+                Submit
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
